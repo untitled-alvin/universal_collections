@@ -43,20 +43,20 @@ class IsarCollectionStore implements CollectionStore {
 
   @override
   Future<Collection?> putCollection(Collection object) async {
-    return write((isar) {
-      isar.collections.put(object);
-      return isar.collections.get(object.id);
-    });
+    write((isar) => isar.collections.put(object));
+    return _isar.collections.get(object.id);
   }
 
   @override
   Future<Collection?> createCollection({String? name, String? data}) async {
-    return write((isar) {
+    final result = write((isar) {
       final id = isar.collections.autoIncrement();
       final object = Collection(id: id, name: name, data: data);
       isar.collections.put(object);
-      return isar.collections.get(id);
+      return object;
     });
+
+    return _isar.collections.get(result.id);
   }
 
   @override
@@ -78,8 +78,10 @@ class IsarCollectionStore implements CollectionStore {
   Future<List<Collection>> getCollections(
       {bool preview = false, int? limit, int? offset}) async {
     return read((isar) {
-      final query = isar.collections.where();
-      return query.findAll(offset: offset, limit: limit);
+      return isar.collections
+          .where()
+          .build()
+          .findAll(offset: offset, limit: limit);
     });
   }
 
@@ -87,10 +89,21 @@ class IsarCollectionStore implements CollectionStore {
   Stream<List<Collection>?> watchCollections(
       {bool preview = false, int? limit, int? offset}) {
     return read((isar) {
-      final query = isar.collections.where();
-      return query.watch(offset: offset, limit: limit);
+      return isar.collections
+          .where()
+          .build()
+          .watch(offset: offset, limit: limit);
     });
   }
+
+  // @override
+  // Stream<List<Collection>?> watchCollections(
+  //     {bool preview = false, int? limit, int? offset}) async* {
+  //   final query = _isar.collections.where().build();
+  //   await for (final results in query.watch(offset: offset, limit: limit)) {
+  //     yield results;
+  //   }
+  // }
 
   @override
   Future<void> dispose() async {}

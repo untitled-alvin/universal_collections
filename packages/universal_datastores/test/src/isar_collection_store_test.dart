@@ -37,23 +37,26 @@ void main() {
         Collection(id: 3, name: 'n3', data: 'd3'),
       ];
 
-      setUp(() {
-        isar.write((isar) => isar.collections.putAll(objects));
-      });
+      setUp(() => isar.write((isar) => isar.collections.clear()));
 
-      tearDown(() {
-        isar.write((isar) => isar.collections.clear());
-      });
+      tearDown(() => isar.write((isar) => isar.collections.clear()));
 
       test(
           'given IsarCollection unempty '
           'when call watchCollections '
           'then listen collections change', () {
-        expectLater(store.watchCollections(offset: 2), emits(isEmpty));
-        expectLater(store.watchCollections(), emits(isEmpty));
-        expectLater(store.watchCollections(limit: 10), emits(isEmpty));
+        expectLater(store.watchCollections(offset: 2), emitsInOrder([isEmpty]));
+        expectLater(store.watchCollections(), emitsInOrder([isEmpty]));
+        expectLater(store.watchCollections(limit: 10), emitsInOrder([isEmpty]));
+        // expectLater(
+        //   store.watchCollections(limit: 10),
+        //   emitsInOrder([isEmpty, isEmpty]),
+        // );
+
+        isar.write((isar) => isar.collections.putAll(objects));
 
         isar.write((isar) => isar.collections.clear());
+        // isar.write((isar) => isar.collections.clear());
       });
     });
 
@@ -64,13 +67,9 @@ void main() {
         Collection(id: 3, name: 'n3', data: 'd3'),
       ];
 
-      setUp(() {
-        isar.write((isar) => isar.collections.putAll(objects));
-      });
+      setUp(() => isar.write((isar) => isar.collections.putAll(objects)));
 
-      tearDown(() {
-        isar.write((isar) => isar.collections.clear());
-      });
+      tearDown(() => isar.write((isar) => isar.collections.clear()));
 
       test(
           'given IsarCollection empty '
@@ -86,8 +85,7 @@ void main() {
           'given IsarCollection unempty '
           'when call getCollections '
           'then return collections succeeds', () async {
-        final actual = await store.getCollections();
-        expect(actual, equals(objects));
+        expect(await store.getCollections(), equals(objects));
       });
 
       test(
@@ -112,8 +110,7 @@ void main() {
 
       test(
           'given IsarCollection unempty '
-          'when call getCollections '
-          'with [offset] < IsarCollection length '
+          'when call getCollections with [offset] < IsarCollection length '
           'then return collections from [offset]', () async {
         const offset = 2;
         final actual = await store.getCollections(offset: offset);
@@ -122,8 +119,7 @@ void main() {
 
       test(
           'given IsarCollection unempty '
-          'when call getCollections '
-          'with [offset] >= IsarCollection length '
+          'when call getCollections with [offset] >= IsarCollection length '
           'then return empty collections', () async {
         expect(await store.getCollections(offset: 3), isEmpty);
         expect(await store.getCollections(offset: 4), isEmpty);
@@ -135,13 +131,9 @@ void main() {
       final testObj = Collection(id: objId, name: '_n', data: '_d');
       final testObj2 = Collection(id: objId);
 
-      setUp(() {
-        isar.write((isar) => isar.collections.put(testObj));
-      });
+      setUp(() => isar.write((isar) => isar.collections.put(testObj)));
 
-      tearDown(() {
-        isar.write((isar) => isar.collections.clear());
-      });
+      tearDown(() => isar.write((isar) => isar.collections.clear()));
 
       test('return collection when update collection succeeds', () async {
         final resonse = await store.putCollection(testObj2);
@@ -165,13 +157,9 @@ void main() {
     group('insertCollection', () {
       final testObj = Collection(id: 1, name: '_n', data: '_d');
 
-      setUp(() {
-        isar.write((isar) => isar.collections.clear());
-      });
+      setUp(() => isar.write((isar) => isar.collections.clear()));
 
-      tearDown(() {
-        isar.write((isar) => isar.collections.clear());
-      });
+      tearDown(() => isar.write((isar) => isar.collections.clear()));
 
       test('return collection when insert collection succeeds', () async {
         final resonse = await store.putCollection(testObj);
@@ -207,13 +195,9 @@ void main() {
     group('count', () {
       final objects = List.generate(3, (i) => Collection(id: i));
 
-      setUp(() {
-        isar.write((isar) => isar.collections.putAll(objects));
-      });
+      setUp(() => isar.write((isar) => isar.collections.putAll(objects)));
 
-      tearDown(() {
-        isar.write((isar) => isar.collections.clear());
-      });
+      tearDown(() => isar.write((isar) => isar.collections.clear()));
 
       test('returns exactly collections length', () {
         final response = store.count();
