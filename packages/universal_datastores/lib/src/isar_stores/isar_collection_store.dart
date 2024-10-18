@@ -37,21 +37,22 @@ class IsarCollectionStore implements CollectionStore {
   int count() => read((isar) => isar.collections.count());
 
   @override
-  Future<Collection?> getCollection(int id) async {
+  Future<SavedCollection?> getCollection(int id) async {
     return read((isar) => isar.collections.get(id));
   }
 
   @override
-  Future<Collection?> putCollection(Collection object) async {
+  Future<SavedCollection?> putCollection(SavedCollection object) async {
     write((isar) => isar.collections.put(object));
     return _isar.collections.get(object.id);
   }
 
   @override
-  Future<Collection?> createCollection({String? name, String? data}) async {
+  Future<SavedCollection?> createCollection(
+      {String? name, String? data}) async {
     final result = write((isar) {
       final id = isar.collections.autoIncrement();
-      final object = Collection(id: id, name: name, data: data);
+      final object = SavedCollection(id: id, name: name, data: data);
       isar.collections.put(object);
       return object;
     });
@@ -60,7 +61,7 @@ class IsarCollectionStore implements CollectionStore {
   }
 
   @override
-  Future<Collection?> deleteCollection(int id) async {
+  Future<SavedCollection?> deleteCollection(int id) async {
     return write((isar) {
       final object = isar.collections.get(id);
 
@@ -75,7 +76,7 @@ class IsarCollectionStore implements CollectionStore {
   }
 
   @override
-  Future<List<Collection>> getCollections(
+  Future<List<SavedCollection>> getCollections(
       {bool preview = false, int? limit, int? offset}) async {
     return read((isar) {
       return isar.collections
@@ -86,7 +87,7 @@ class IsarCollectionStore implements CollectionStore {
   }
 
   @override
-  Stream<List<Collection>?> watchCollections(
+  Stream<List<SavedCollection>?> watchCollections(
       {bool preview = false, int? limit, int? offset}) {
     return read((isar) {
       return isar.collections
@@ -96,15 +97,12 @@ class IsarCollectionStore implements CollectionStore {
     });
   }
 
-  // @override
-  // Stream<List<Collection>?> watchCollections(
-  //     {bool preview = false, int? limit, int? offset}) async* {
-  //   final query = _isar.collections.where().build();
-  //   await for (final results in query.watch(offset: offset, limit: limit)) {
-  //     yield results;
-  //   }
-  // }
-
   @override
   Future<void> dispose() async {}
+
+  @override
+  Future<SavedItem?> putSavedItem(SavedItem object) async {
+    write((isar) => isar.items.put(object));
+    return _isar.items.get(object.id);
+  }
 }
